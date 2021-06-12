@@ -31,3 +31,6 @@ pythonenv*
 *~
 tags
 [._]*.un~
+
+result
+result-*
