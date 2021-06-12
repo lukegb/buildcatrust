@@ -3,15 +3,15 @@
 # SPDX-License-Identifier: MIT
 
 import pathlib
-import runpy
+
+from buildcatrust import cli
 
 TESTDATA_DIR = pathlib.Path(__file__).parent / "testdata"
 
 
 def run_main(**kwargs):
-    buildcatrust = runpy.run_module("buildcatrust")
     args = [f"--{k}={v}" for k, v in kwargs.items()]
-    return buildcatrust["main"](args)
+    return cli.cli_main(args)
 
 
 def check_output_main(tmp_path, want_p11kit, want_ca, main_args):

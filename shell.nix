@@ -125,14 +125,19 @@ let
     ];
   };
   myPython = python.withPackages (pm: with pm; [
+    pre-commit
+
+    # for pre-commit
     black
     isort
     pytest
-    pytest-cov
     pytype
+
+    # for misc local testing
+    pytest-cov
     pyasn1
+
     flit
-    pre-commit
   ]);
 in
 pkgs.mkShell {
