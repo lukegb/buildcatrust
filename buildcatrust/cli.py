@@ -143,7 +143,7 @@ def cli_main(raw_args):
 
 
 def main():
-    sys.exit(cli_main(sys.argv) or 0)
+    sys.exit(cli_main(sys.argv[1:]) or 0)
 
 
 if __name__ == "__main__":
