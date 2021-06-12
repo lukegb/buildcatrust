@@ -1,0 +1,21 @@
+# SPDX-FileCopyrightText: 2021 Luke Granger-Brown <git@lukegb.com>
+#
+# SPDX-License-Identifier: CC0-1.0
+
+[build-system]
+requires = ["flit_core >=2,<4"]
+build-backend = "flit_core.buildapi"
+
+[tool.flit.metadata]
+module = "buildcatrust"
+author = "Luke Granger-Brown"
+author-email = "buildcatrust@lukegb.com"
+home-page = "https://github.com/lukegb/buildcatrust"
+classifiers = [ "License :: OSI Approved :: MIT License", ]
+
+[tool.isort]
+profile = "google"
+src_paths = ["buildcatrust"]
+
+[tool.pytest.ini_options]
+testpaths = ["buildcatrust"]

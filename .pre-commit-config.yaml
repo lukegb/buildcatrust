@@ -1,0 +1,34 @@
+# SPDX-FileCopyrightText: 2021 Luke Granger-Brown <git@lukegb.com>
+#
+# SPDX-License-Identifier: CC0-1.0
+
+repos:
+  - repo: local
+    hooks:
+      - id: pytype
+        name: pytype
+        entry: pytype
+        args:
+          - buildcatrust/
+        language: python
+        types_or: [python, pyi]
+        pass_filenames: false
+      - id: reuse
+        name: reuse
+        entry: reuse lint
+        language: python
+        types_or: [file]
+        pass_filenames: false
+        always_run: true
+      - id: black
+        name: black
+        entry: black
+        language: python
+        require_serial: true
+        types_or: [python, pyi]
+      - id: isort
+        name: isort
+        entry: isort
+        language: python
+        require_serial: true
+        types_or: [python]

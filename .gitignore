@@ -1,0 +1,33 @@
+# SPDX-FileCopyrightText: 2021 Luke Granger-Brown <git@lukegb.com>
+#
+# SPDX-License-Identifier: CC0-1.0
+
+dist/
+gi/
+buildcatrust/tests/testdata/local/
+__pycache__/
+htmlcov/
+__pypackages__/
+.env/
+.venv/
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+pythonenv*
+.pytype/
+.pytest_cache/
+.coverage
+
+[._]*.s[a-v][a-z]
+!*.svg
+[._]*.sw[a-p]
+[._]s[a-rt-v][a-z]
+[._]ss[a-gi-z]
+[._]sw[a-p]
+
+.netrwhist
+*~
+tags
+[._]*.un~
