@@ -44,7 +44,10 @@ def load_blocklist(path: str) -> Set[str]:
     block = set()
     with open(path, "r") as f:
         for ln in f:
-            block.add(ln.strip())
+            ln = ln.strip()
+            if not ln or ln.startswith("#"):
+                continue
+            block.add(ln)
     return block
 
 
