@@ -78,7 +78,7 @@ def _parse_args(args):
     return argparser, argparser.parse_args(args)
 
 
-def main(raw_args):
+def cli_main(raw_args):
     argparser, args = _parse_args(raw_args)
     if not (args.certdata_input or args.ca_bundle_input):
         argparser.print_help()
@@ -142,5 +142,9 @@ def main(raw_args):
     return 0
 
 
+def main():
+    sys.exit(cli_main(sys.argv) or 0)
+
+
 if __name__ == "__main__":
-    sys.exit(main(sys.argv) or 0)
+    main()
