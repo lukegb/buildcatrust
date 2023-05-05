@@ -101,6 +101,8 @@ def cli_main(raw_args):
                 os.path.join(bundle_path, f) for f in os.listdir(bundle_path)
             ]
             bundle_files = [f for f in bundle_files if os.path.isfile(f)]
+        else:
+            raise FileNotFoundError(f"Bundle not found inside the sandbox: {bundle_path}")
         for f in bundle_files:
             with open(f) as ca_bundle_fp:
                 db.add_certs(certstore_parser.read_certificates(ca_bundle_fp))
