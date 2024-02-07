@@ -1,44 +1,14 @@
-# SPDX-FileCopyrightText: 2021 Luke Granger-Brown <git@lukegb.com>
+# SPDX-FileCopyrightText: 2021 the buildcatrust authors
 #
 # SPDX-License-Identifier: MIT
 
 { pkgs ? import <nixpkgs> {
-    overlays = [ (self: super: rec {
-      python39 = super.python39.override {
-        packageOverrides = self: super: {
-          attrs = super.attrs.overridePythonAttrs (oldAttrs: rec {
-            version = "21.2.0";
-            src = super.fetchPypi {
-              pname = "attrs";
-              inherit version;
-              sha256 = "sha256:1yzmwi5d197p0qhl7rl4xi9q1w8mk9i3zn6hrl22knbcrb1slspg";
-            };
-          });
-          typed-ast = super.typed-ast.overridePythonAttrs (oldAttrs: rec {
-            version = "1.4.3";
-            src = super.fetchPypi {
-              pname = "typed_ast";
-              inherit version;
-              sha256 = "sha256:0rgcynvicc614fyzq1bdq9c864wrkhwq21ypxnfa5pish2nbw6zv";
-            };
-          });
-          pyasn1 = super.pyasn1.overridePythonAttrs (old: rec {
-            version = "unstable-20200320";
-            src = pkgs.fetchFromGitHub {
-              owner = "etingof";
-              repo = "pyasn1";
-              rev = "db8f1a7930c6b5826357646746337dafc983f953";
-              sha256 = "sha256:05ss2l1d9zrl9c4cf1r5xfiwrp955l982w61588qhgvk9y3mxi0x";
-            };
-          });
-        };
-      };
-    }) ];
+    # overlays = [ (self: super: { }) ];
   }
 }:
 
 let
-  python = pkgs.python39;
+  python = pkgs.python3;
   importlab = python.pkgs.buildPythonPackage rec {
     pname = "importlab";
     version = "0.6.1";
@@ -52,7 +22,8 @@ let
       networkx
     ];
 
-    checkInputs = [ pkgs.python2 ];
+    # Tries to use Python2?
+    doCheck = false;
   };
   ninjaPy = python.pkgs.buildPythonPackage rec {
     pname = "ninja";
@@ -125,8 +96,6 @@ let
     ];
   };
   myPython = python.withPackages (pm: with pm; [
-    pre-commit
-
     # for pre-commit
     black
     isort
@@ -142,9 +111,10 @@ let
 in
 pkgs.mkShell {
   buildInputs = with pkgs; [
+    pre-commit
     myPython
     openssl
     ninja
-    (reuse.override { python3Packages = myPython.pkgs; })
+    reuse
   ];
 }
