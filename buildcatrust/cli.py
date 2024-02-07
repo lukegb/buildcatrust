@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# SPDX-FileCopyrightText: 2021 Luke Granger-Brown <git@lukegb.com>
+# SPDX-FileCopyrightText: 2021 the buildcatrust authors
 #
 # SPDX-License-Identifier: MIT
 
@@ -58,6 +58,10 @@ def _parse_args(args):
     )
     argparser.add_argument(
         "--ca_bundle_output", help="Path to output certificate bundle output to."
+    )
+    argparser.add_argument(
+        "--ca_standard_bundle_output",
+        help="Path to output the PEM-standard certificate bundle output to.",
     )
     argparser.add_argument(
         "--ca_unpacked_output", help="Path to output certificate unbundled output to."
@@ -133,8 +137,16 @@ def cli_main(raw_args):
     did_output = False
     outputs = {
         "p11kit_output": (output_to_file, p11kit_output.P11KitOutput),
-        "ca_bundle_output": (output_to_file, certstore_output.CertStoreOutput),
-        "ca_unpacked_output": (output_to_dir, certstore_output.CertStoreOutput, ".crt"),
+        "ca_bundle_output": (output_to_file, certstore_output.OpenSSLCertStoreOutput),
+        "ca_unpacked_output": (
+            output_to_dir,
+            certstore_output.OpenSSLCertStoreOutput,
+            ".crt",
+        ),
+        "ca_standard_bundle_output": (
+            output_to_file,
+            certstore_output.StandardCertStoreOutput,
+        ),
     }
     for k, v in outputs.items():
         did_output = v[0](db, args, k, *v[1:]) or did_output

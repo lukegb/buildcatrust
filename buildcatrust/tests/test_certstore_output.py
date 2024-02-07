@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2021 Luke Granger-Brown <git@lukegb.com>
+# SPDX-FileCopyrightText: 2021 the buildcatrust authors
 #
 # SPDX-License-Identifier: MIT
 
@@ -31,8 +31,35 @@ def test_certificate(certum):
     cert, trust = certum
 
     buf = io.StringIO()
+    certstore_output.StandardCertStoreOutput(buf).output(cert, trust)
 
-    certstore_output.CertStoreOutput(buf).output(cert, trust)
+    assert (
+        buf.getvalue()
+        == """\
+Certum EC-384 CA
+-----BEGIN CERTIFICATE-----
+MIICZTCCAeugAwIBAgIQeI8nXIESUiClBNAt3bpz9DAKBggqhkjOPQQDAzB0MQsw
+CQYDVQQGEwJQTDEhMB8GA1UEChMYQXNzZWNvIERhdGEgU3lzdGVtcyBTLkEuMScw
+JQYDVQQLEx5DZXJ0dW0gQ2VydGlmaWNhdGlvbiBBdXRob3JpdHkxGTAXBgNVBAMT
+EENlcnR1bSBFQy0zODQgQ0EwHhcNMTgwMzI2MDcyNDU0WhcNNDMwMzI2MDcyNDU0
+WjB0MQswCQYDVQQGEwJQTDEhMB8GA1UEChMYQXNzZWNvIERhdGEgU3lzdGVtcyBT
+LkEuMScwJQYDVQQLEx5DZXJ0dW0gQ2VydGlmaWNhdGlvbiBBdXRob3JpdHkxGTAX
+BgNVBAMTEENlcnR1bSBFQy0zODQgQ0EwdjAQBgcqhkjOPQIBBgUrgQQAIgNiAATE
+KI6rGFtqvm5kN2PkzeyrOvfMobgOgknXhimfoZTy42B4mIF4Bk3y7JoOV2CDn7Tm
+Fy8as10CW4kjPMIRBSqniBMY81CE1700LCeJVf/OTOffph8oxPBUw7l8t1Ot68Kj
+QjBAMA8GA1UdEwEB/wQFMAMBAf8wHQYDVR0OBBYEFI0GZnQkdjrzife81r1HfS+8
+EF9LMA4GA1UdDwEB/wQEAwIBBjAKBggqhkjOPQQDAwNoADBlAjADVS2m5hjEfO/J
+UG7BJw+ch69u1RsIGL2SKcHvlJF40jocVYli5RsJHrpka/F2tNQCMQC0QoSZ/6vn
+nvuRlydd3LBbMHHOXjgaatkl5+r3YZJW+OraNsKHZZYuciUvf9/DE8k=
+-----END CERTIFICATE-----
+
+"""
+    )
+
+    # Clear the buffer.
+    buf = io.StringIO()
+
+    certstore_output.OpenSSLCertStoreOutput(buf).output(cert, trust)
 
     assert (
         buf.getvalue()
@@ -83,7 +110,20 @@ def test_distrusted_certificate(certum):
 
     buf = io.StringIO()
 
-    certstore_output.CertStoreOutput(buf).output(cert, trust.as_distrusted())
+    certstore_output.StandardCertStoreOutput(buf).output(cert, trust.as_distrusted())
+
+    assert (
+        buf.getvalue()
+        == """\
+Certum EC-384 CA
+Traditional PEM block omitted: this certificate is not trusted for authenticating servers.
+"""
+    )
+
+    # Clear the buffer.
+    buf = io.StringIO()
+
+    certstore_output.OpenSSLCertStoreOutput(buf).output(cert, trust.as_distrusted())
 
     assert (
         buf.getvalue()
@@ -127,6 +167,10 @@ def test_no_certificate(certum):
 
     buf = io.StringIO()
 
-    certstore_output.CertStoreOutput(buf).output(None, trust)
+    certstore_output.StandardCertStoreOutput(buf).output(None, trust)
+
+    assert buf.getvalue() == ""
+
+    certstore_output.OpenSSLCertStoreOutput(buf).output(None, trust)
 
     assert buf.getvalue() == ""
