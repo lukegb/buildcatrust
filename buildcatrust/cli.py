@@ -7,6 +7,7 @@
 import argparse
 import os.path
 import sys
+from typing import Callable, TextIO
 
 from . import certstore_output
 from . import certstore_parser
@@ -15,7 +16,12 @@ from . import p11kit_output
 from . import types
 
 
-def output_to_file(db: types.CertDB, args, arg_name: str, output_cls) -> bool:
+def output_to_file(
+    db: types.CertDB,
+    args: argparse.Namespace,
+    arg_name: str,
+    output_cls: Callable[[TextIO], types.CertificateOutput],
+) -> bool:
     file_name = getattr(args, arg_name)
     if not file_name:
         return False
@@ -27,7 +33,11 @@ def output_to_file(db: types.CertDB, args, arg_name: str, output_cls) -> bool:
 
 
 def output_to_dir(
-    db: types.CertDB, args, arg_name: str, output_cls, extension: str
+    db: types.CertDB,
+    args: argparse.Namespace,
+    arg_name: str,
+    output_cls: Callable[[TextIO], types.CertificateOutput],
+    extension: str,
 ) -> bool:
     dir_name = getattr(args, arg_name)
     if not dir_name:
@@ -49,7 +59,7 @@ def load_blocklist(path: str) -> set[str]:
     return block
 
 
-def _parse_args(args):
+def _parse_args(args: list[str]) -> tuple[argparse.ArgumentParser, argparse.Namespace]:
     argparser = argparse.ArgumentParser()
     argparser.add_argument(
         "--p11kit_output", help="Path to output p11kit-compatible output to."

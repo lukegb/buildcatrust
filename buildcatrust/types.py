@@ -5,6 +5,7 @@
 from collections.abc import Iterable
 import dataclasses
 import hashlib
+from typing import Protocol
 
 from . import der_x509
 from . import enums
@@ -262,3 +263,8 @@ def _parser_object_to_python(
         return Certificate.from_parser_object(obj)
     elif obj[b"CKA_CLASS"] == enums.ObjectType.NSS_TRUST:
         return Trust.from_parser_object(obj)
+
+
+class CertificateOutput(Protocol):
+    def output(self, cert: Certificate | None, trust: Trust) -> None:
+        ...
