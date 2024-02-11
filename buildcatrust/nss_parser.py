@@ -56,13 +56,13 @@ def _value_to_python(ck_type: bytes, ck_value: bytes) -> ParsedValue:
 
 class Parser:
     def __init__(self):
-        self.objects = []  # type: List[ParsedObject]
+        self.objects = []  # type: list[ParsedObject]
         self.state = ParserState.AWAITING_DATA
 
-        self._current_object = None  # type: Optional[ParsedObject]
-        self._current_attribute = None  # type: Optional[bytes]
-        self._current_type = None  # type: Optional[bytes]
-        self._current_value = None  # type: Optional[ParsedValue]
+        self._current_object = None  # type: ParsedObject | None
+        self._current_attribute = None  # type: bytes | None
+        self._current_type = None  # type: bytes | None
+        self._current_value = None  # type: ParsedValue | None
 
     @staticmethod
     def _split_line(ln: bytes) -> Iterable[bytes]:
