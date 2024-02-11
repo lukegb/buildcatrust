@@ -2,9 +2,10 @@
 #
 # SPDX-License-Identifier: MIT
 
+from collections.abc import Iterable
 import enum
 import re
-from typing import Dict, Iterable, Union
+from typing import Union
 
 from . import enums
 
@@ -22,7 +23,7 @@ class ParseError(Exception):
 
 
 ParsedValue = Union[bool, enums.ObjectType, str, bytes, enums.TrustType]
-ParsedObject = Dict[bytes, ParsedValue]
+ParsedObject = dict[bytes, ParsedValue]
 
 
 def _value_to_python(ck_type: bytes, ck_value: bytes) -> ParsedValue:

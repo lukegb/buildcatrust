@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: MIT
 
-from typing import Dict, List, TextIO, Tuple
+from typing import TextIO
 
 from . import der_x509
 from . import enums
@@ -11,8 +11,8 @@ from . import x509_consts
 
 
 def _cert_bytes_to_cert_and_trust(
-    b: bytes, trust_attrs: Dict[str, enums.TrustType]
-) -> Tuple[types.Certificate, types.Trust]:
+    b: bytes, trust_attrs: dict[str, enums.TrustType]
+) -> tuple[types.Certificate, types.Trust]:
     x509_cert, trailing = der_x509.Certificate.from_der(b)
     if trailing:
         raise Exception("got trailing garbage parsing X509 certificate")
@@ -27,7 +27,7 @@ def _cert_bytes_to_cert_and_trust(
     return cert, trust
 
 
-def read_certificates(fp: TextIO) -> List[Tuple[types.Certificate, types.Trust]]:
+def read_certificates(fp: TextIO) -> list[tuple[types.Certificate, types.Trust]]:
     certs = []
     while True:
         data = der_x509.PEMBlock.decode_from_file(fp)
@@ -36,7 +36,7 @@ def read_certificates(fp: TextIO) -> List[Tuple[types.Certificate, types.Trust]]
                 # EOF
                 break
             else:
-                raise IOError("something went wrong")
+                raise OSError("something went wrong")
         _, pem_block = data
         if pem_block.name == "CERTIFICATE":
             certs.append(

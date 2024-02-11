@@ -7,7 +7,6 @@
 import argparse
 import os.path
 import sys
-from typing import Set
 
 from . import certstore_output
 from . import certstore_parser
@@ -39,9 +38,9 @@ def output_to_dir(
     return True
 
 
-def load_blocklist(path: str) -> Set[str]:
+def load_blocklist(path: str) -> set[str]:
     block = set()
-    with open(path, "r") as f:
+    with open(path) as f:
         for ln in f:
             ln = ln.strip()
             if not ln or ln.startswith("#"):
@@ -103,7 +102,7 @@ def cli_main(raw_args):
             ]
             bundle_files = [f for f in bundle_files if os.path.isfile(f)]
         for f in bundle_files:
-            with open(f, "r") as ca_bundle_fp:
+            with open(f) as ca_bundle_fp:
                 db.add_certs(certstore_parser.read_certificates(ca_bundle_fp))
 
     blocklist = frozenset()

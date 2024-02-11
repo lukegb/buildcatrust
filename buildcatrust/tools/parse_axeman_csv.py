@@ -7,14 +7,13 @@
 import base64
 import csv
 import sys
-from typing import List
 
 from buildcatrust import der_x509
 from buildcatrust import types
 
 
 def process_path(path: str) -> None:
-    with open(path, "r", newline="") as f:
+    with open(path, newline="") as f:
         csvr = csv.reader(f)
         for row in csvr:
             log_url, log_index = row[0:2]
@@ -31,7 +30,7 @@ def process_path(path: str) -> None:
                 )
 
 
-def main(argv: List[str]) -> int:
+def main(argv: list[str]) -> int:
     for path in argv:
         process_path(path)
     return 0

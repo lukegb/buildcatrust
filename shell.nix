@@ -105,6 +105,7 @@ let
     # for misc local testing
     pytest-cov
     pyasn1
+    pyupgrade
 
     flit
   ]);
