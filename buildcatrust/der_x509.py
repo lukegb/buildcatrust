@@ -426,6 +426,49 @@ class DistinguishedName:
     def as_der(self) -> bytes:
         return self.der
 
+    def as_openssl_canon_der(self) -> bytes:
+        # Ref:
+        # https://github.com/openssl/openssl/blob/925118e8c3b1041ce7f9840c2d67e7f878123e6b/crypto/x509/x_name.c#L299-L310
+        #
+        # 1. All strings:
+        #    a. Are UTF-8
+        #    b. Have leading/trailing/multiple spaces collapsed
+        #    c. Are converted to lower case
+        # 2. The leading SEQUENCE header is removed.
+
+        if not self.bits:
+            # Special case: empty -> null encoding
+            return b""
+
+        output = bytearray()
+        for bit in self.bits:
+            bits_buf = bytearray()
+            for oid, value in bit:
+                bit_buf = bytearray()
+                bit_buf.extend(oid.as_der())
+
+                # Remove leading/trailing/multiple space
+                value = " ".join(value.split())
+                # Lowercase
+                # ...this might have different behaviour to OpenSSL.
+                # Who knows.
+                value = value.lower()
+
+                value_enc = value.encode("utf-8")
+
+                bit_buf.extend(b"\x0c")  # ASN.1 UTF-8 string
+                bit_buf.extend(_encode_len(len(value_enc)))
+                bit_buf.extend(value_enc)
+
+                bits_buf.extend(b"\x30")
+                bits_buf.extend(_encode_len(len(bit_buf)))
+                bits_buf.extend(bit_buf)
+            output.extend(b"\x31")
+            output.extend(_encode_len(len(bits_buf)))
+            output.extend(bits_buf)
+
+        return bytes(output)
+
     @staticmethod
     def _bit_to_str(bit: tuple[ObjectID, str]) -> str:
         from . import x509_consts
