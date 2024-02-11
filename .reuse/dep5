@@ -3,6 +3,10 @@ Upstream-Name: buildcatrust
 Upstream-Contact: Luke Granger-Brown <git@lukegb.com>
 Source: https://github.com/lukegb/buildcatrust
 
+Files: AUTHORS
+Copyright: 2024 the buildcatrust authors <git@lukegb.com>
+License: MIT
+
 # Sample paragraph, commented out:
 #
 # Files: src/*
