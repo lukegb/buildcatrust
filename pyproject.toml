@@ -22,3 +22,6 @@ src_paths = ["buildcatrust"]
 
 [tool.pytest.ini_options]
 testpaths = ["buildcatrust"]
+
+[tool.pytype]
+inputs = ["buildcatrust"]
