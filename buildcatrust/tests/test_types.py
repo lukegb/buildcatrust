@@ -28,6 +28,7 @@ def test_certificate():
         cert.sha256_fingerprint
         == "6b328085625318aa50d173c98d8bda09d57e27413d114cf787a0f5d06c030cf6"
     )
+    assert cert.openssl_subject_hash == "9482e63a"
 
     assert cert.clean_filename == "Certum_EC-384_CA:788f275c81125220a504d02dddba73f4"
 

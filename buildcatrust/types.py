@@ -5,6 +5,7 @@
 from collections.abc import Iterable
 import dataclasses
 import hashlib
+from typing import Protocol
 
 from . import der_x509
 from . import enums
@@ -76,6 +77,14 @@ class Certificate:
     @property
     def clean_filename(self) -> str:
         return _to_filename(self)
+
+    @property
+    def openssl_subject_hash(self) -> str:
+        # Reimplementation of:
+        # https://github.com/openssl/openssl/blob/925118e8c3b1041ce7f9840c2d67e7f878123e6b/crypto/x509/x509_cmp.c#L289
+        h = hashlib.sha1(usedforsecurity=False)
+        h.update(self.subject.as_openssl_canon_der())
+        return h.digest()[::-1].hex()[-8:]
 
     def public_key_pem(self) -> der_x509.PEMBlock:
         der_cert, trailing = der_x509.Certificate.from_der(self.value)
@@ -262,3 +271,8 @@ def _parser_object_to_python(
         return Certificate.from_parser_object(obj)
     elif obj[b"CKA_CLASS"] == enums.ObjectType.NSS_TRUST:
         return Trust.from_parser_object(obj)
+
+
+class CertificateOutput(Protocol):
+    def output(self, cert: Certificate | None, trust: Trust) -> None:
+        ...
