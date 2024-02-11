@@ -140,7 +140,7 @@ label: {_quote(trust.label)}
 class: certificate
 certificate-type: x-509
 modifiable: false
-issuer: {_quote(trust.issuer)}
+issuer: {_quote(trust.issuer.as_der())}
 serial-number: {_quote(trust.serial_number)}
 {self._trust_attributes(trust)}
 """

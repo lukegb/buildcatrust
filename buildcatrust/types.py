@@ -94,7 +94,7 @@ class Certificate:
 @dataclasses.dataclass(frozen=True)
 class Trust:
     label: str
-    issuer: bytes
+    issuer: der_x509.DistinguishedName
     serial_number: bytes
 
     trust_step_up_approved: bool
@@ -147,7 +147,7 @@ class Trust:
     def from_parser_object(cls, obj: nss_parser.ParsedObject):
         return cls(
             label=obj[b"CKA_LABEL"],
-            issuer=obj[b"CKA_ISSUER"],
+            issuer=_dn_from_der(obj[b"CKA_ISSUER"]),
             serial_number=obj[b"CKA_SERIAL_NUMBER"],
             trust_step_up_approved=obj[b"CKA_TRUST_STEP_UP_APPROVED"],
             # We expect these to be present

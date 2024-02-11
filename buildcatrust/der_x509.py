@@ -397,12 +397,14 @@ def parse_trusted_certificate(pb: PEMBlock) -> Tuple[bytes, OpenSSLCertAux, byte
 @dataclasses.dataclass(frozen=True)
 class DistinguishedName:
     bits: List[List[Tuple[ObjectID, str]]]
+    der: bytes
 
     @classmethod
     def from_der(cls, b: bytes) -> Tuple["DistinguishedName", bytes]:
         assert b[0] == 0x30
-        dn_len, _, b = _decode_len(b[1:])
+        dn_len, len_b, b = _decode_len(b[1:])
         b, rem = b[:dn_len], b[dn_len:]
+        original_der = b"\x30" + len_b + b
 
         bits = []
         while b:
@@ -423,7 +425,10 @@ class DistinguishedName:
                 assert seq_b == b"", "DN seq contained >2 parts"
                 set_bits.append((seq_oid, part_b.decode("utf-8")))
             bits.append(set_bits)
-        return cls(bits=bits), rem
+        return cls(bits=bits, der=original_der), rem
+
+    def as_der(self) -> bytes:
+        return self.der
 
     @staticmethod
     def _bit_to_str(bit: Tuple[ObjectID, str]) -> str:
