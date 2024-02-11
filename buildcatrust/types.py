@@ -2,11 +2,9 @@
 #
 # SPDX-License-Identifier: MIT
 
-import base64
 import dataclasses
 import hashlib
-import textwrap
-from typing import Dict, Iterable, List, Optional, Set, Tuple, Union
+from typing import Dict, Iterable, List, Optional, Tuple, Union
 
 from . import der_x509
 from . import enums

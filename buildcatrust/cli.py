@@ -11,7 +11,6 @@ from typing import Set
 
 from . import certstore_output
 from . import certstore_parser
-from . import der_x509
 from . import nss_parser
 from . import p11kit_output
 from . import types

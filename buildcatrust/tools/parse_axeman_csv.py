@@ -6,7 +6,6 @@
 
 import base64
 import csv
-import logging
 import sys
 from typing import List
 

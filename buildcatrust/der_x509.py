@@ -4,14 +4,10 @@
 
 import base64
 import dataclasses
-import enum
-import hashlib
 import io
 import re
-import sys
 import textwrap
 from typing import List, Optional, Protocol, TextIO, Tuple
-import urllib.parse
 
 
 def _decode_len(i: bytes) -> Tuple[int, bytes, bytes]:

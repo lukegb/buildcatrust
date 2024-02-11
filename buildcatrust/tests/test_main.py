@@ -2,8 +2,6 @@
 #
 # SPDX-License-Identifier: MIT
 
-import pathlib
-import runpy
 
 from . import helpers
 

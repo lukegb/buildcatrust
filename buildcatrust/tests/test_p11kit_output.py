@@ -12,7 +12,6 @@ from buildcatrust import enums
 from buildcatrust import nss_parser
 from buildcatrust import p11kit_output
 from buildcatrust import types
-from buildcatrust import x509_consts
 
 
 @pytest.fixture

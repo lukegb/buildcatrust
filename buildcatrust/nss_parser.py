@@ -4,7 +4,7 @@
 
 import enum
 import re
-from typing import Dict, Iterable, List, Optional, Set, Union
+from typing import Dict, Iterable, Union
 
 from . import enums
 

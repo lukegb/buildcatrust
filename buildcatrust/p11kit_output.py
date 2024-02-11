@@ -2,7 +2,6 @@
 #
 # SPDX-License-Identifier: MIT
 
-import textwrap
 from typing import List, Optional, TextIO, Union
 import urllib.parse
 

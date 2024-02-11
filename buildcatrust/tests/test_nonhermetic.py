@@ -4,8 +4,6 @@
 
 """These tests intentionally rely on artifacts and binaries that are not included in the repo."""
 
-import pathlib
-import runpy
 import shutil
 import tarfile
 import urllib.request
