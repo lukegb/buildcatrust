@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2021 Luke Granger-Brown <git@lukegb.com>
+# SPDX-FileCopyrightText: 2021 the buildcatrust authors
 #
 # SPDX-License-Identifier: MIT
 
@@ -28,6 +28,21 @@ class CertStoreOutput:
                 "Traditional PEM block omitted: this certificate is not trusted for authenticating servers.",
                 file=self.fp,
             )
+
+
+class StandardCertStoreOutput(CertStoreOutput):
+    """
+    PEM standard abiding output when the OpenSSL specific format
+    with trust rules is incompatible with your software.
+    """
+
+
+class OpenSSLCertStoreOutput(CertStoreOutput):
+    def output(self, cert: Optional[types.Certificate], trust: types.Trust) -> None:
+        if not cert:
+            return
+
+        super().output(cert, trust)
 
         # Output OpenSSL-style TRUSTED CERTIFICATE entries.
         if trust.trusted_key_usages:
