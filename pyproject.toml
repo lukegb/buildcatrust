@@ -2,23 +2,31 @@
 #
 # SPDX-License-Identifier: CC0-1.0
 
+[project]
+name = "buildcatrust"
+requires-python = ">=3.11"
+license.file = "LICENSES/MIT.txt"
+authors = [
+    {name = "Luke Granger-Brown", email = "buildcatrust@lukegb.com"},
+    {name = "Ryan Lahfa", email = "ryan@lahfa.xyz"},
+]
+maintainers = [
+    {name = "Luke Granger-Brown", email = "buildcatrust@lukegb.com"},
+]
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+]
+dynamic = ["description", "version"]
+
+[project.urls]
+Source = "https://github.com/lukegb/buildcatrust"
+
+[project.scripts]
+buildcatrust = "buildcatrust.cli:main"
+
 [build-system]
 requires = ["flit_core >=2,<4"]
 build-backend = "flit_core.buildapi"
-
-[tool.flit.metadata]
-module = "buildcatrust"
-author = "Luke Granger-Brown"
-author-email = "buildcatrust@lukegb.com"
-home-page = "https://github.com/lukegb/buildcatrust"
-classifiers = [ "License :: OSI Approved :: MIT License", ]
-
-[tool.flit.scripts]
-buildcatrust = "buildcatrust.cli:main"
-
-[tool.isort]
-profile = "google"
-src_paths = ["buildcatrust"]
 
 [tool.pytest.ini_options]
 testpaths = ["buildcatrust"]
