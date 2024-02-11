@@ -1,0 +1,86 @@
+# SPDX-FileCopyrightText: 2024 Luke Granger-Brown <git@lukegb.com>
+#
+# SPDX-License-Identifier: CC0-1.0
+
+name: "Release"
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - "v*"
+jobs:
+  test-and-build:
+    name: Build distribution
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4.1.1
+    - uses: cachix/install-nix-action@v25
+      with:
+        nix_path: nixpkgs=channel:nixos-unstable
+    - uses: cachix/cachix-action@v14
+      with:
+        name: buildcatrust
+        authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
+
+    # Do the initial grabbing of the bits we need.
+    - run: nix-shell --run "true"
+
+    # Run all the tests.
+    - run: nix-shell --run "pre-commit run --all --color=always --show-diff-on-failure"
+    - run: nix-shell --run "pytest"
+
+    # Build artifacts into dist/
+    - run: nix-shell --run "flit build"
+
+    - name: Store distribution packages
+      uses: actions/upload-artifact@v4.3.1
+      with:
+        name: python-package-distributions
+        path: dist/
+
+  test-pypi-publish:
+    name: Upload release to TestPyPI
+    runs-on: ubuntu-latest
+    needs:
+      - test-and-build
+    permissions:
+      id-token: write
+    environment:
+      name: testpypi
+      url: https://test.pypi.org/p/buildcatrust
+
+    steps:
+    - name: Download distributions
+      uses: actions/download-artifact@v4.1.2
+      with:
+        name: python-package-distributions
+        path: dist/
+
+    - name: Publish to TestPyPI
+      uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        repository-url: https://test.pypi.org/legacy/
+
+  pypi-publish:
+    name: Upload release to PyPI
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    needs:
+      - test-and-build
+    permissions:
+      id-token: write
+    environment:
+      name: pypi
+      url: https://pypi.org/p/buildcatrust
+
+    steps:
+    - name: Download distributions
+      uses: actions/download-artifact@v4.1.2
+      with:
+        name: python-package-distributions
+        path: dist/
+
+    - name: Publish to PyPI
+      uses: pypa/gh-action-pypi-publish@release/v1
