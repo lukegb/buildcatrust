@@ -4,17 +4,13 @@
 
 import base64
 import dataclasses
-import enum
-import hashlib
 import io
 import re
-import sys
 import textwrap
-from typing import List, Optional, Protocol, TextIO, Tuple
-import urllib.parse
+from typing import Protocol, TextIO
 
 
-def _decode_len(i: bytes) -> Tuple[int, bytes, bytes]:
+def _decode_len(i: bytes) -> tuple[int, bytes, bytes]:
     if i[0] > 0x80:
         length_length = i[0] & 0x7F
         return (
@@ -36,7 +32,7 @@ def _encode_len(n: int) -> bytearray:
     return out
 
 
-def der_int_to_python(i: bytes) -> Tuple[int, bytes, bytes]:
+def der_int_to_python(i: bytes) -> tuple[int, bytes, bytes]:
     assert i[0] == 0x02
     length, length_bytes, data = _decode_len(i[1:])
     assert len(data) == length
@@ -61,7 +57,7 @@ def _encode_int(n: int) -> bytearray:
     return nbuf[::-1]
 
 
-def _decode_int(b: bytes) -> Tuple[int, bytes]:
+def _decode_int(b: bytes) -> tuple[int, bytes]:
     if b[0] < 0x80:
         return int(b[0]), b[1:]
 
@@ -74,7 +70,7 @@ def _decode_int(b: bytes) -> Tuple[int, bytes]:
         pos += 1
 
 
-def _dumb_decode(i: bytes) -> Tuple[Tuple[int, bytes], bytes]:
+def _dumb_decode(i: bytes) -> tuple[tuple[int, bytes], bytes]:
     tag = i[0]
     der_len, length_bytes, buf = _decode_len(i[1:])
     return (tag, i[:1] + length_bytes + buf[:der_len]), buf[der_len:]
@@ -82,8 +78,8 @@ def _dumb_decode(i: bytes) -> Tuple[Tuple[int, bytes], bytes]:
 
 @dataclasses.dataclass(frozen=True, order=True)
 class ObjectID:
-    name: Optional[str]
-    oid: List[int]
+    name: str | None
+    oid: list[int]
 
     def __str__(self) -> str:
         return ".".join(str(s) for s in self.oid)
@@ -101,7 +97,7 @@ class ObjectID:
         return hash(self.oid)
 
     @classmethod
-    def from_str(cls, name: Optional[str], oid: str) -> "ObjectID":
+    def from_str(cls, name: str | None, oid: str) -> "ObjectID":
         return cls(name=name, oid=[int(s) for s in oid.split(".")])
 
     def as_der(self) -> bytes:
@@ -115,7 +111,7 @@ class ObjectID:
         return bytes(prefix + buf)
 
     @classmethod
-    def from_der(cls, b: bytes) -> Tuple["ObjectID", bytes]:
+    def from_der(cls, b: bytes) -> tuple["ObjectID", bytes]:
         assert b[0] == 0x06
         oid_len, _, b = _decode_len(b[1:])
         b, trailing = b[:oid_len], b[oid_len:]
@@ -133,7 +129,7 @@ class ObjectID:
 
 @dataclasses.dataclass(frozen=True)
 class ExtendedKeyUsages:
-    oids: List[ObjectID]
+    oids: list[ObjectID]
 
     def as_der(self) -> bytes:
         buf = bytearray()
@@ -185,13 +181,13 @@ class TBSCertificate:
     subject: bytes
     subject_public_key_info: bytes
 
-    version: Optional[bytes] = None
-    issuer_unique_id: Optional[bytes] = None
-    subject_unique_id: Optional[bytes] = None
-    extensions: Optional[bytes] = None
+    version: bytes | None = None
+    issuer_unique_id: bytes | None = None
+    subject_unique_id: bytes | None = None
+    extensions: bytes | None = None
 
     @classmethod
-    def from_der(cls, b: bytes) -> Tuple["TBSCertificate", bytes]:
+    def from_der(cls, b: bytes) -> tuple["TBSCertificate", bytes]:
         assert b[0] == 0x30
         cert_len, _, b = _decode_len(b[1:])
         b, rem = b[:cert_len], b[cert_len:]
@@ -251,7 +247,7 @@ class Certificate:
     signature_value: bytes
 
     @classmethod
-    def from_der(cls, b: bytes) -> Tuple["Certificate", bytes]:
+    def from_der(cls, b: bytes) -> tuple["Certificate", bytes]:
         assert b[0] == 0x30  # sequence
         cert_len, _, b = _decode_len(b[1:])
         b, rem = b[:cert_len], b[cert_len:]
@@ -298,7 +294,7 @@ class PEMBlock:
         ).format(name=self.name, encoded=encoded)
 
     @classmethod
-    def decode(cls, b: str) -> Optional[Tuple[str, "PEMBlock", str]]:
+    def decode(cls, b: str) -> tuple[str, "PEMBlock", str] | None:
         sio = io.StringIO(b)
         ret = cls.decode_from_file(sio)
         if not ret:
@@ -306,7 +302,7 @@ class PEMBlock:
         return ret[0], ret[1], sio.read()
 
     @classmethod
-    def decode_from_file(cls, fp: TextIO) -> Optional[Tuple[str, "PEMBlock"]]:
+    def decode_from_file(cls, fp: TextIO) -> tuple[str, "PEMBlock"] | None:
         prefix = []
         start_match = None
         for ln in fp:
@@ -333,11 +329,11 @@ class PEMBlock:
 
 @dataclasses.dataclass(frozen=True)
 class OpenSSLCertAux:
-    trust: List[ObjectID]
-    reject: List[ObjectID]
+    trust: list[ObjectID]
+    reject: list[ObjectID]
 
     @staticmethod
-    def encode_oids(oids: List[ObjectID], tag: int = 0x30) -> bytes:
+    def encode_oids(oids: list[ObjectID], tag: int = 0x30) -> bytes:
         buf = bytearray()
         for oid in oids:
             buf.extend(oid.as_der())
@@ -356,7 +352,7 @@ class OpenSSLCertAux:
         return bytes(prefix + buf)
 
     @classmethod
-    def from_der(cls, b: bytes) -> Tuple["OpenSSLCertAux", bytes]:
+    def from_der(cls, b: bytes) -> tuple["OpenSSLCertAux", bytes]:
         assert b[0] == 0x30  # sequence
         aux_len, _, b = _decode_len(b[1:])
         b, rem = b[:aux_len], b[aux_len:]
@@ -384,7 +380,7 @@ def to_trusted_certificate(cert: bytes, certaux: OpenSSLCertAux) -> PEMBlock:
     return PEMBlock(name="TRUSTED CERTIFICATE", content=cert + certaux.as_der())
 
 
-def parse_trusted_certificate(pb: PEMBlock) -> Tuple[bytes, OpenSSLCertAux, bytes]:
+def parse_trusted_certificate(pb: PEMBlock) -> tuple[bytes, OpenSSLCertAux, bytes]:
     assert pb.name == "TRUSTED CERTIFICATE"
     # TODO(lukegb): make this less bad: we parse the cert then throw it away
     # this is because I don't want to ensure that we're parsing the cert "properly"
@@ -396,13 +392,15 @@ def parse_trusted_certificate(pb: PEMBlock) -> Tuple[bytes, OpenSSLCertAux, byte
 
 @dataclasses.dataclass(frozen=True)
 class DistinguishedName:
-    bits: List[List[Tuple[ObjectID, str]]]
+    bits: list[list[tuple[ObjectID, str]]]
+    der: bytes
 
     @classmethod
-    def from_der(cls, b: bytes) -> Tuple["DistinguishedName", bytes]:
+    def from_der(cls, b: bytes) -> tuple["DistinguishedName", bytes]:
         assert b[0] == 0x30
-        dn_len, _, b = _decode_len(b[1:])
+        dn_len, len_b, b = _decode_len(b[1:])
         b, rem = b[:dn_len], b[dn_len:]
+        original_der = b"\x30" + len_b + b
 
         bits = []
         while b:
@@ -423,10 +421,13 @@ class DistinguishedName:
                 assert seq_b == b"", "DN seq contained >2 parts"
                 set_bits.append((seq_oid, part_b.decode("utf-8")))
             bits.append(set_bits)
-        return cls(bits=bits), rem
+        return cls(bits=bits, der=original_der), rem
+
+    def as_der(self) -> bytes:
+        return self.der
 
     @staticmethod
-    def _bit_to_str(bit: Tuple[ObjectID, str]) -> str:
+    def _bit_to_str(bit: tuple[ObjectID, str]) -> str:
         from . import x509_consts
 
         oid, s = bit
@@ -437,7 +438,7 @@ class DistinguishedName:
             return f"{str(oid)}={s}"
 
     @classmethod
-    def _set_to_str(cls, set_bits: List[Tuple[ObjectID, str]]) -> str:
+    def _set_to_str(cls, set_bits: list[tuple[ObjectID, str]]) -> str:
         assert len(set_bits) > 0
         if len(set_bits) == 1:
             return cls._bit_to_str(set_bits[0])

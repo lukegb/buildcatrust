@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: MIT
 
-from typing import Optional, TextIO
+from typing import TextIO
 
 from . import der_x509
 from . import enums
@@ -13,7 +13,7 @@ class CertStoreOutput:
     def __init__(self, fp: TextIO):
         self.fp = fp
 
-    def output(self, cert: Optional[types.Certificate], trust: types.Trust) -> None:
+    def output(self, cert: types.Certificate | None, trust: types.Trust) -> None:
         if not cert:
             return
 
@@ -38,7 +38,7 @@ class StandardCertStoreOutput(CertStoreOutput):
 
 
 class OpenSSLCertStoreOutput(CertStoreOutput):
-    def output(self, cert: Optional[types.Certificate], trust: types.Trust) -> None:
+    def output(self, cert: types.Certificate | None, trust: types.Trust) -> None:
         if not cert:
             return
 

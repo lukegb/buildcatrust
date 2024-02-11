@@ -4,8 +4,6 @@
 
 import os
 
-import pytest
-
 from buildcatrust import enums
 from buildcatrust import nss_parser
 from buildcatrust import types

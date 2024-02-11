@@ -22,3 +22,20 @@ src_paths = ["buildcatrust"]
 
 [tool.pytest.ini_options]
 testpaths = ["buildcatrust"]
+
+[tool.pytype]
+inputs = ["buildcatrust"]
+
+[tool.ruff]
+select = ["F", "E", "W", "I"]
+ignore = [
+  "E501",  # drop E501 line-too-long, format will do its best
+]
+
+[tool.ruff.lint.isort]
+force-single-line = true
+force-sort-within-sections = true
+# lexicographical
+single-line-exclusions = ["typing"]
+order-by-type = false
+# group-by-package

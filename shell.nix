@@ -9,22 +9,6 @@
 
 let
   python = pkgs.python3;
-  importlab = python.pkgs.buildPythonPackage rec {
-    pname = "importlab";
-    version = "0.6.1";
-
-    src = python.pkgs.fetchPypi {
-      inherit pname version;
-      sha256 = "sha256:0gpq9za0ykq4b2x8i4ykj6nj11m15824idd4j5i8zfpiklr06r85";
-    };
-
-    propagatedBuildInputs = with python.pkgs; [
-      networkx
-    ];
-
-    # Tries to use Python2?
-    doCheck = false;
-  };
   ninjaPy = python.pkgs.buildPythonPackage rec {
     pname = "ninja";
     version = "1.10.0.post2";
@@ -72,13 +56,27 @@ let
       EOF
     '';
   };
-  pytype = python.pkgs.buildPythonPackage rec {
-    pname = "pytype";
-    version = "2021.5.25";
+  pycnite = python.pkgs.buildPythonPackage rec {
+    pname = "pycnite";
+    version = "2023.10.11";
+    pyproject = true;
 
     src = python.pkgs.fetchPypi {
       inherit pname version;
-      sha256 = "sha256:1am113x1rla8vfyvcibahyxnydw2maxv8qvihrwwqp1lvnp9q0ih";
+      sha256 = "sha256:18car2rh02ayrf299hryfgvb2i5hw27sm68917r3kk7f5fc1d1md";
+    };
+
+    buildInputs = with python.pkgs; [
+      setuptools
+    ];
+  };
+  pytype = python.pkgs.buildPythonPackage rec {
+    pname = "pytype";
+    version = "2024.2.9";
+
+    src = python.pkgs.fetchPypi {
+      inherit pname version;
+      sha256 = "sha256:106dma6qjsgqyh5ky7czfnp1vy5kzi5mfxz2lpw413pyrcxxwfj9";
     };
 
     doCheck = false;  # tries to parse Python2 things
@@ -86,25 +84,28 @@ let
     propagatedBuildInputs = with python.pkgs; [
       attrs
       importlab
+      jinja2
+      libcst
+      networkx
       ninjaPy
-      pylint
-      pyyaml
-      six
-      toml
-      typed-ast
       pybind11
+      pycnite
+      pydot
+      pylint
+      tabulate
+      toml
+      typing-extensions
     ];
   };
   myPython = python.withPackages (pm: with pm; [
     # for pre-commit
-    black
-    isort
     pytest
     pytype
 
     # for misc local testing
     pytest-cov
     pyasn1
+    pyupgrade
 
     flit
   ]);
@@ -116,5 +117,6 @@ pkgs.mkShell {
     openssl
     ninja
     reuse
+    ruff
   ];
 }

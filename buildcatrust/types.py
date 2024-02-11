@@ -2,11 +2,9 @@
 #
 # SPDX-License-Identifier: MIT
 
-import base64
+from collections.abc import Iterable
 import dataclasses
 import hashlib
-import textwrap
-from typing import Dict, Iterable, List, Optional, Set, Tuple, Union
 
 from . import der_x509
 from . import enums
@@ -29,8 +27,8 @@ class Certificate:
     serial_number: bytes
     value: bytes
     mozilla_ca_policy: bool
-    server_distrust_after: Optional[bytes]
-    email_distrust_after: Optional[bytes]
+    server_distrust_after: bytes | None
+    email_distrust_after: bytes | None
 
     sha1_fingerprint: str
     sha256_fingerprint: str
@@ -94,7 +92,7 @@ class Certificate:
 @dataclasses.dataclass(frozen=True)
 class Trust:
     label: str
-    issuer: bytes
+    issuer: der_x509.DistinguishedName
     serial_number: bytes
 
     trust_step_up_approved: bool
@@ -147,7 +145,7 @@ class Trust:
     def from_parser_object(cls, obj: nss_parser.ParsedObject):
         return cls(
             label=obj[b"CKA_LABEL"],
-            issuer=obj[b"CKA_ISSUER"],
+            issuer=_dn_from_der(obj[b"CKA_ISSUER"]),
             serial_number=obj[b"CKA_SERIAL_NUMBER"],
             trust_step_up_approved=obj[b"CKA_TRUST_STEP_UP_APPROVED"],
             # We expect these to be present
@@ -194,7 +192,7 @@ class Trust:
         # We distrust the cert if it is untrusted for *anything*.
         return bool(self.untrusted_key_usages)
 
-    def _key_usages(self, trust_state: enums.TrustType) -> List[der_x509.ObjectID]:
+    def _key_usages(self, trust_state: enums.TrustType) -> list[der_x509.ObjectID]:
         oids = []
         for purpose in x509_consts.PURPOSES:
             if getattr(self, f"trust_{purpose.trust_name}") == trust_state:
@@ -202,11 +200,11 @@ class Trust:
         return oids
 
     @property
-    def trusted_key_usages(self) -> List[der_x509.ObjectID]:
+    def trusted_key_usages(self) -> list[der_x509.ObjectID]:
         return self._key_usages(enums.TrustType.TRUSTED_DELEGATOR)
 
     @property
-    def untrusted_key_usages(self) -> List[der_x509.ObjectID]:
+    def untrusted_key_usages(self) -> list[der_x509.ObjectID]:
         return self._key_usages(enums.TrustType.NOT_TRUSTED)
 
     @property
@@ -214,7 +212,7 @@ class Trust:
         return _to_filename(self)
 
 
-def _to_filename(obj: Union[Certificate, Trust]) -> str:
+def _to_filename(obj: Certificate | Trust) -> str:
     serial, _, serial_rem = der_x509.der_int_to_python(obj.serial_number)
     assert not serial_rem
     return "{clean_label}:{serial_hex}".format(
@@ -235,8 +233,8 @@ def _to_filename(obj: Union[Certificate, Trust]) -> str:
 
 @dataclasses.dataclass(frozen=True)
 class CertDB:
-    certmap: Dict[str, Certificate] = dataclasses.field(default_factory=dict)
-    trustmap: Dict[str, Trust] = dataclasses.field(default_factory=dict)
+    certmap: dict[str, Certificate] = dataclasses.field(default_factory=dict)
+    trustmap: dict[str, Trust] = dataclasses.field(default_factory=dict)
 
     def add_nss_objs(self, objs: Iterable[nss_parser.ParsedObject]) -> None:
         for obj in objs:
@@ -246,7 +244,7 @@ class CertDB:
             elif isinstance(pobj, Trust):
                 self.trustmap[pobj.clean_filename] = pobj
 
-    def add_certs(self, objs: Iterable[Tuple[Certificate, Trust]]) -> None:
+    def add_certs(self, objs: Iterable[tuple[Certificate, Trust]]) -> None:
         for cert, trust in objs:
             assert cert.label == trust.label
             assert cert.issuer == trust.issuer
@@ -257,7 +255,7 @@ class CertDB:
 
 def _parser_object_to_python(
     obj: nss_parser.ParsedObject,
-) -> Optional[Union[Certificate, Trust]]:
+) -> Certificate | Trust | None:
     if obj[b"CKA_CLASS"] == enums.ObjectType.NSS_BUILTIN_ROOT_LIST:
         return None
     elif obj[b"CKA_CLASS"] == enums.ObjectType.CERTIFICATE:

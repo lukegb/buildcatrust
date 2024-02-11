@@ -2,8 +2,7 @@
 #
 # SPDX-License-Identifier: MIT
 
-import textwrap
-from typing import List, Optional, TextIO, Union
+from typing import TextIO
 import urllib.parse
 
 from . import der_x509
@@ -18,7 +17,7 @@ _P11KIT_DUMMY_KEY_USAGE_OID = der_x509.ObjectID.from_str(
 )
 
 
-def _quote(s: Union[bytes, str]) -> str:
+def _quote(s: bytes | str) -> str:
     quoted = urllib.parse.quote(s, safe="/ ")
     return f'"{quoted}"'
 
@@ -27,7 +26,7 @@ class P11KitOutput:
     def __init__(self, fp: TextIO):
         self.fp = fp
 
-    def output(self, cert: Optional[types.Certificate], trust: types.Trust) -> None:
+    def output(self, cert: types.Certificate | None, trust: types.Trust) -> None:
         self.fp.write(f"# {trust.clean_filename}\n")
         if cert:
             self._cert_and_trust(cert, trust)
@@ -67,7 +66,7 @@ class P11KitOutput:
         self,
         cert: types.Certificate,
         oid: der_x509.ObjectID,
-        key_usages: List[der_x509.ObjectID],
+        key_usages: list[der_x509.ObjectID],
     ) -> None:
         """Write out a X.509 extension override in p11-kit object format."""
         ce_bytes = _quote(
@@ -140,7 +139,7 @@ label: {_quote(trust.label)}
 class: certificate
 certificate-type: x-509
 modifiable: false
-issuer: {_quote(trust.issuer)}
+issuer: {_quote(trust.issuer.as_der())}
 serial-number: {_quote(trust.serial_number)}
 {self._trust_attributes(trust)}
 """

@@ -40,7 +40,6 @@ CKA_LABEL UTF8 "Happy Flappy"
 def test_parses_cert_obj():
     with open(
         os.path.join(os.path.dirname(__file__), "testdata", "certdata-certumec384.txt"),
-        "r",
     ) as f:
         objs = _parse(f.read())
     assert objs[1] == {
