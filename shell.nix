@@ -99,8 +99,6 @@ let
   };
   myPython = python.withPackages (pm: with pm; [
     # for pre-commit
-    black
-    isort
     pytest
     pytype
 
@@ -118,5 +116,6 @@ pkgs.mkShell {
     openssl
     ninja
     reuse
+    ruff
   ];
 }

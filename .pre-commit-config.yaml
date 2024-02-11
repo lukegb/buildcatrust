@@ -20,15 +20,15 @@ repos:
         types_or: [file]
         pass_filenames: false
         always_run: true
-      - id: black
-        name: black
-        entry: black
+      - id: ruff
+        name: ruff
+        entry: ruff check
         language: python
-        require_serial: true
         types_or: [python, pyi]
-      - id: isort
-        name: isort
-        entry: isort
-        language: python
         require_serial: true
-        types_or: [python]
+      - id: ruff-format
+        name: ruff-format
+        entry: ruff format
+        language: python
+        types_or: [python, pyi]
+        require_serial: true
